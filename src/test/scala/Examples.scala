@@ -16,6 +16,8 @@ class Nats extends FunSuite:
       Space()
     )
 
+    //comment
+
     val resulting = State(
       Space(),
       initial.k,
