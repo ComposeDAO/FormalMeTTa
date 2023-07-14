@@ -19,6 +19,8 @@ case class QueryKRule(K: Context) extends RewriteRule:
     val State(i, k, w, o) = x
     i.ts.exists{ case K(t_) => !insensitive(t_, k); case _ => false }
 
+  def name: String = "QueryK"
+
   def apply(x: State): State =
     val State(i, k, w, o) = x
 
@@ -36,6 +38,7 @@ case class ChainKRule(K: Context) extends RewriteRule:
     val State(i, k, w, o) = x
     w.ts.exists{ case K(u) => !insensitive(u, k); case _ => false }
 
+  def name: String = "ChainK"
 
   def apply(x: State): State =
     val State(i, k, w, o) = x
@@ -56,6 +59,8 @@ case class DoubleMul2KRule(K: Context) extends RewriteRule:
       case K(Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral))) => true
       case _ => false
     }
+
+  def name: String = "DoubleMul2K"
 
   def apply(x: State): State =
     val State(i, k, w, o) = x

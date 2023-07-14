@@ -25,6 +25,19 @@ def execute(initial: State, rules: Iterable[RewriteRule]): State =
       case None => return state
   throw IllegalStateException()
 
+def execute_print(initial: State, rules: Iterable[RewriteRule]): State =
+  var state = initial
+  while true do
+    println()
+    println(state.overview)
+    rules.find(_.isDefinedAt(state)) match
+      case Some(rule) => {
+        println("- " + rule.name + " -")
+        state = rule(state)
+      }
+      case None => return state
+  throw IllegalStateException()
+
 def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRule]): State =
   var state = initial
   while true do
@@ -32,6 +45,19 @@ def executeWithContext(initial: State, contextRules: State => Iterable[RewriteRu
 //    println(state.overview)
     contextRules(state).find(_.isDefinedAt(state)) match
       case Some(rule) => state = rule(state)
+      case None => return state
+  throw IllegalStateException()
+
+def executeWithContext_print(initial: State, contextRules: State => Iterable[RewriteRule]): State =
+  var state = initial
+  while true do
+   println()
+   println(state.overview)
+    contextRules(state).find(_.isDefinedAt(state)) match
+      case Some(rule) => {
+        println("- " + rule.name + " -")
+        state = rule(state)
+      }
       case None => return state
   throw IllegalStateException()
 
@@ -65,6 +91,7 @@ extension (t: Term)
     case `===` => "="
     case `addAtom` => "addAtom"
     case `remAtom` => "remAtom"
+    case `sealedVars` => "sealed"
 
     case Mul => "*"
     case BoolLiteral(value) => value.toString

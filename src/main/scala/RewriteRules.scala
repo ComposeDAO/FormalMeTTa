@@ -1,6 +1,8 @@
 case class State(i: Space, k: Space, w: Space, o: Space)
 
-trait RewriteRule extends PartialFunction[State, State]
+trait RewriteRule extends PartialFunction[State, State] {
+  def name: String
+}
 
 
 case object QueryRule extends RewriteRule:
@@ -10,6 +12,8 @@ case object QueryRule extends RewriteRule:
     // insensitive(t', k')
     val State(i, k, w, o) = x
     i.ts.exists(t_ => !insensitive(t_, k))
+
+  def name: String = "Query"
 
   def apply(x: State): State =
     // State({t'} ++ i, k, w, o) -->
@@ -32,6 +36,7 @@ case object ChainRule extends RewriteRule:
     val State(i, k, w, o) = x
     w.ts.exists(u => !insensitive(u, k))
 
+  def name: String = "Chain"
 
   def apply(x: State): State =
     // State(i, k, {u} ++ w, o) -->
@@ -59,6 +64,8 @@ case object TransformRule extends RewriteRule:
       case _ => false
     }
 
+  def name: String = "Transform"
+
   def apply(x: State): State =
     // State({(transform t y)} ++ i, k, w, o) -->
     // State(i, k, {u_1 sigma_1} ++ ... ++ {u_1 sigma_1} ++ w, o)
@@ -85,6 +92,8 @@ case object AddAtom1Rule extends RewriteRule:
       case _ => false
     }
 
+  def name: String = "AddAtom"
+
   def apply(x: State): State =
     // State({(addAtom t)} ++ i, k, w, o) -->
     // State(i, {t} ++ k, w, {()} ++ o)
@@ -105,6 +114,8 @@ case object BoolMul1Rule extends RewriteRule:
       case Expr(Vector(`Mul`, _: BoolLiteral, _: BoolLiteral)) => true
       case _ => false
     }
+
+  def name: String = "BoolMul1"
 
   def apply(x: State): State =
     // State({(Mul b1 b2)} ++ i, k, w, o) -->
@@ -127,6 +138,8 @@ case object BoolMul2Rule extends RewriteRule:
       case _ => false
     }
 
+  def name: String = "BoolMul2"
+
   def apply(x: State): State =
     // State(i, k, w, o) -->
     // State(i, k, w', {b1 & b2} ++ o)
@@ -147,6 +160,8 @@ case object DoubleMul1Rule extends RewriteRule:
       case Expr(Vector(`Mul`, _: DoubleLiteral, _: DoubleLiteral)) => true
       case _ => false
     }
+
+  def name: String = "DoubleMul1"
 
   def apply(x: State): State =
     // State({(Mul d1 d2)} ++ i, k, w, o) -->
@@ -169,6 +184,8 @@ case object DoubleMul2Rule extends RewriteRule:
       case _ => false
     }
 
+  def name: String = "DoubleMul2"
+
   def apply(x: State): State =
     // State(i, k, w, o) -->
     // State(i, k, w', {b1 * b2} ++ o)
@@ -186,6 +203,8 @@ case object OutputRule extends RewriteRule:
     // insensitive(u, k)
     val State(i, k, w, o) = x
     w.ts.exists(u => insensitive(u, k))
+
+  def name: String = "Output"
 
   def apply(x: State): State =
     // State(i, k, {u} ++ w, o) -->
