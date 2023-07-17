@@ -44,68 +44,99 @@ val modifiedTs = t match {
 case class Expr(ts: Vector[Term]) extends Term
 object Expr {
   def apply(t: Term, ts: Term*): Expr = {
-    val uniqueVars: Map[String, String] = Map.empty[String, String]
+    var uniqueVars: Set[String] = Set.empty[String]
+    var uniqueMap: Map[String, String] = Map.empty[String, String]
     val varsArray: ArrayBuffer[Term] = ArrayBuffer.empty[Term]
     val sealedVarsArray: ArrayBuffer[Term] = ArrayBuffer.empty[Term]
 
+    System.out.println("apply for t = " + t)
+    System.out.println("apply for ts = " + ts)
 
-    if (t.isInstanceOf[Builtin] && t.asInstanceOf[Builtin] == sealedVars) {
+    if (t.isInstanceOf[Sealed]) {
       System.out.println("hitting apply for t = " + t)
       System.out.println("hitting apply for ts = " + ts)
+
+      val sealedInstance = t.asInstanceOf[Sealed]  // Cast t to Sealed
 
       getSealedVars(ts.toVector,sealedVarsArray)
       filterVarsAndExprs(ts.toVector,varsArray)
 
-      System.out.println("sealedVarsArray = " + sealedVarsArray)
-      sealedVarsArray.foreach {
-        case Sealed(v) =>
-          System.out.println("Sealed Var Value = " + v)
-          if (!uniqueVars.contains(v)) {
-            System.out.println("v= " + v)
-            val newVarId = UUID.randomUUID().toString()
-            uniqueVars(v) = newVarId // Add new key-value pair to the map
-          }
-        case _ => {}
-      }
+      uniqueVars = sealedInstance.vars.toSet
 
       System.out.println("uniqueVars = " + uniqueVars)
+    }
 
+    if (uniqueVars.nonEmpty) {
+      uniqueVars.foreach { v =>
+        val newVarId = UUID.randomUUID().toString()
+        uniqueMap += (v -> newVarId)
+      }
+      println("uniqueMap: " + uniqueMap)
       val modifiedTerms = ts.map {
-          case Var(v) => {
+        case Var(v) => {
             System.out.println("Var hit = " + v)
-            val varValue: Var = uniqueVars.get(v) match {
+            val varValue: Var = uniqueMap.get(v) match {
               case Some(value) => Var(value) // Value exists in the map, create Var with the existing value
               case None => Var(v)
-                //shouldnt get here
-                // System.out.println("v= " +v)
-                // val newVarId = UUID.randomUUID().toString()
-                // uniqueVars(v)= newVarId // Add new key-value pair to the map
-                // Var(newVarId) // Create Var with the new UUID
             }
             varValue
           }
-          case nestedExpr: Expr => {
-            System.out.println("Expr hit = " + nestedExpr)
-            System.out.println("Expr hit ts= " + nestedExpr.ts)
-            Expr(modifyVarsInExpr(nestedExpr, uniqueVars))
-          }
-          case Sealed(name) => {
-            System.out.println("sealed var hit = " + name)
-            None
-          }
-          case term => {
-            System.out.println("term hit = " + term)
-            term
-          }
+        case nestedExpr: Expr => {
+          System.out.println("Expr hit = " + nestedExpr)
+          System.out.println("Expr hit ts= " + nestedExpr.ts)
+          Expr(modifyVarsInExpr(nestedExpr, uniqueMap))
         }
-        System.out.println("modifiedTerms = " +modifiedTerms)
-
-        val modifiedTermsVector: Vector[Term] = modifiedTerms.toVector.collect { case term: Term => term }
-        Expr(modifiedTermsVector)
-        //Expr(modifiedTerms.toVector)
+        case term => {
+          System.out.println("term hit = " + term)
+          term
+        }
+      }
+      System.out.println("modifiedTerms = " +modifiedTerms)
+      val modifiedTermsVector: Vector[Term] = modifiedTerms.toVector.collect { case term: Term => term }
+      Expr(modifiedTermsVector)
     } else {
+      println("Unique vars is empty")
       Expr(t +: ts.toVector)
     }
+
+    //   val modifiedTerms = ts.map {
+          // case Var(v) => {
+          //   System.out.println("Var hit = " + v)
+          //   val varValue: Var = uniqueVars.get(v) match {
+          //     case Some(value) => Var(value) // Value exists in the map, create Var with the existing value
+          //     case None => Var(v)
+          //       //shouldnt get here
+          //       System.out.println("v= " +v)
+          //       val newVarId = UUID.randomUUID().toString()
+          //       uniqueVars(v)= newVarId // Add new key-value pair to the map
+          //       Var(newVarId) // Create Var with the new UUID
+          //   }
+          //   varValue
+          // }
+          // case nestedExpr: Expr => {
+          //   System.out.println("Expr hit = " + nestedExpr)
+          //   System.out.println("Expr hit ts= " + nestedExpr.ts)
+          //   Expr(modifyVarsInExpr(nestedExpr, uniqueVars))
+          // }
+    //       case Sealed(name) => {
+    //         System.out.println("sealed var hit = " + name)
+    //         None
+    //       }
+    //       case term => {
+    //         System.out.println("term hit = " + term)
+    //         term
+    //       }
+    //     }
+    //     System.out.println("modifiedTerms = " +modifiedTerms)
+
+        // val modifiedTermsVector: Vector[Term] = modifiedTerms.toVector.collect { case term: Term => term }
+        // Expr(modifiedTermsVector)
+    //     //Expr(modifiedTerms.toVector)
+    // } else {
+    //   Expr(t +: ts.toVector)
+    // }
+
+    
   }
 
   private def getSealedVars(terms: Vector[Term], sealedVarsArray: ArrayBuffer[Term]): ArrayBuffer[Term] = {
@@ -158,7 +189,7 @@ sealed trait Atom extends Term
 
 case class Var(name: String) extends Atom
 
-case class Sealed(name: String) extends Atom
+case class Sealed(vars: Vector[String]) extends Atom
 
 case class Symbol(name: String) extends Atom
 
