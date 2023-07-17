@@ -87,16 +87,21 @@ Example 3.
     // System.out.println("expTest = " + expTest );
     // val expTest2 = Expr(===, Expr(`sealedVars`, Var("x"), Var("y")))
     // System.out.println("expTest2 = " + expTest2 );
-    // val expTest3 = Expr(Expr(===, Expr(`sealedVars`, Var("x"), Var("y"))),Expr(`sealedVars`, Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y"))))
-    // System.out.println("expTest3 = " + expTest3 );
-    val expTest4 = Expr(===, Expr(`sealedVars`, Expr(StringLiteral("F"), Var("x"))), Expr(StringLiteral("prim"), Var("x")))
-    System.out.println("expTest4 = " + expTest4 );
+    val expTest3 = Expr(Expr(===, Expr(`sealedVars`, Sealed("x"), Sealed("y"), Var("x"), Var("y"))),Expr(`sealedVars`, Sealed("y"), Sealed("z"), Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y"))))
+    System.out.println("expTest3 = " + expTest3 );
+    // val expTest4 = Expr(===, Expr(`sealedVars`, Expr(StringLiteral("F"), Var("x"))), Expr(StringLiteral("prim"), Var("x")))
+    // System.out.println("expTest4 = " + expTest4 );
+
+    // val expTest5 = Expr(`sealedVars`, Var("x"), Expr(StringLiteral("prim"), Var("x")))
+    // System.out.println("expTest5 = " + expTest5 );
+    // val expTest5 = Expr(Expr(===, Expr(`sealedVars`, Var("x"), Var("y"))),Expr(`sealedVars`, Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y"))))
+    // System.out.println("expTest5 = " + expTest5 );
     
 
     val initial = State(
       Space(Expr(StringLiteral("F"), StringLiteral("a"))), //query
       Space(
-        Expr(===, Expr(`sealedVars`, StringLiteral("F"), Var("x")), Expr(StringLiteral("prim"), Var("x"))),
+        Expr(===, Expr(`sealedVars`, Sealed("x"), StringLiteral("F"), Var("x")), Expr(StringLiteral("prim"), Var("x"))),
       ),
       Space(),
       Space()
