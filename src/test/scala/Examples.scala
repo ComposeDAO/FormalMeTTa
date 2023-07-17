@@ -29,74 +29,9 @@ class Nats extends FunSuite:
 class SealedTest extends FunSuite:
   test("basic") {
 
-    /*
-    We introduce a new unify, written unify+, defined by
-
-unify+( t, u ) = unify( t, u )
-unify+( ( sealed x1 … xN t ), u ) = unify( t, u )
-Intuitively,
-
-(= (sealed x (f x)) (prim x))
-
-distinguishes between the x inside the seal and the x outside the seal.
-
-(= (f asldkfjadflkajsdflkajsdf) (prim x))
-
-(sealed x (= (f x) (prim x)))
-
-(and (sealed x (= (f x) (prim x))) (log filename x))
-
-Example 1.
-< {(f a)}, {(= (sealed x (f x)) (prim x))}, {}, {} >
-=> (by query rule)
-< {}, {(= (sealed x (f x)) (prim x))}, {(prim x)}, {} >
-=> (by builtin rules)
-< {}, {(= (sealed x (f x)) (prim x))}, {prim(x)}, {} >
-=> (x is not bound)
-< {}, {(= (sealed x (f x)) (prim x))}, {error("x is not bound")}, {} >
-=> (by output rule)
-< {}, {(= (sealed x (f x)) (prim x))}, {}, {error("x is not bound")} >
-
-Example 2.
-< {(f a)}, {(sealed x (= (f x) (prim x)))}, {}, {} >
-=> (by query rule for sealed terms)
-< {}, {(sealed x (= (f x) (prim x)))}, {(prim a)}, {} > 
-=> (by builtin rules)
-< {}, {(sealed x (= (f x) (prim x)))}, {prim(a)}, {} > 
-=> (by output rule)
-< {}, {(sealed x (= (f x) (prim x)))}, {}, {prim(a)} > 
-
-Example 3.
-< {(= (= (f x) y) (= (f x) (and y (log filename x)))), (f a)}, {(sealed x (= (f x) (prim x)))}, {}, {} >
-=> (by query rule for sealed terms)
-< {(f a)}, {(sealed x (= (f x) (prim x)))}, {(= (f x) (and (prim x) (log filename x')))}, {} >
-=> (by query rule for sealed terms)
-< {}, {(sealed x (= (f x) (prim x)))}, {(prim a), (= (f x) (and (prim x) (log filename x')))}, {} >
-=> (by builtin rules)
-< {}, {(sealed x (= (f x) (prim x)))}, {prim(a), (= (f x) (and (prim x) (log filename x')))}, {} >
-=> (by output rule)
-< {}, {(sealed x (= (f x) (prim x)))}, {(= (f x) (and (prim x) (log filename x')))}, {prim(a)} >
-    */
-
-    // val x = Expr(===, Expr(StringLiteral("F"), Var("x")))
-    // System.out.println(x);
-    // val y = Expr(===, Expr(StringLiteral("Add"), Var("x")), Var("y"));
-    // System.out.println(y);
-
-    // val expTest = Expr(`sealedVars`, Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y")))
-    // System.out.println("expTest = " + expTest );
-    // val expTest2 = Expr(===, Expr(`sealedVars`, Var("x"), Var("y")))
-    // System.out.println("expTest2 = " + expTest2 );
     val expTest3 = Expr(Expr(===, Expr(Sealed(Vector[String]("x", "y")), Var("x"), Var("y"))),Expr(Sealed(Vector[String]("y", "z")), Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y"))))
     System.out.println("expTest3 = " + expTest3 );
-    // val expTest4 = Expr(===, Expr(`sealedVars`, Expr(StringLiteral("F"), Var("x"))), Expr(StringLiteral("prim"), Var("x")))
-    // System.out.println("expTest4 = " + expTest4 );
 
-    // val expTest5 = Expr(`sealedVars`, Var("x"), Expr(StringLiteral("prim"), Var("x")))
-    // System.out.println("expTest5 = " + expTest5 );
-    // val expTest5 = Expr(Expr(===, Expr(`sealedVars`, Var("x"), Var("y"))),Expr(`sealedVars`, Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y"))))
-    // System.out.println("expTest5 = " + expTest5 );
-    
 
     val initial = State(
       Space(Expr(StringLiteral("F"), StringLiteral("a"))), //query
@@ -107,24 +42,12 @@ Example 3.
       Space()
     )
 
-    // // val initial = State(
-    // //   Space(Expr(StringLiteral("F"), StringLiteral("a"))), //query
-    // //   Space(
-    // //     Expr(===, Expr(StringLiteral("F"), Var("x")), Expr(StringLiteral("prim"), Var("x"))),
-    // //     Expr(Expr(`sealedVars`, Var("x"), Var("y"), Expr(===, Expr(StringLiteral("Add"), Var("z")), Var("y")))),
-    // //   ),
-    // //   Space(),
-    // //   Space()
-    // // )
-
     val resulting = State(
       Space(),
       initial.k,
       Space(),
       Space(Expr(StringLiteral("prim"),StringLiteral("x")))
     )
-
-    // //execute_print(initial, allRules) == resulting
 
     assert(execute_print(initial, allRules).w == resulting.w)
   }

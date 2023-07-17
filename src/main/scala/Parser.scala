@@ -19,7 +19,6 @@ object Tokenizer:
     t.registerToken{ case "=" => === }
     t.registerToken{ case "addAtom" => addAtom }
     t.registerToken{ case "remAtom" => remAtom }
-    t.registerToken{ case "sealedVars" => sealedVars }
 
     t.registerToken{ case "*" => Mul }
     t.registerToken{ case d if d.toDoubleOption.isDefined => DoubleLiteral(d.toDouble) }

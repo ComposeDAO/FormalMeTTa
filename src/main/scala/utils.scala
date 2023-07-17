@@ -86,12 +86,15 @@ extension (t: Term)
     case Expr(ts) => ts.map(_.pretty).mkString("(", " ", ")")
     case Var(name) => s"$$$name"
     case Symbol(name) => name
+    case Sealed(vars) => {
+      var sealedStr: String = vars.toString()
+      "{sealed " + sealedStr + "}"
+    }
 
     case `transform` => "transform"
     case `===` => "="
     case `addAtom` => "addAtom"
     case `remAtom` => "remAtom"
-    case `sealedVars` => "sealed"
 
     case Mul => "*"
     case BoolLiteral(value) => value.toString
